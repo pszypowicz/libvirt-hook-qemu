@@ -2,11 +2,12 @@
 
 """Libvirt port-forwarding hook.
 
-Libvirt hook for setting up iptables port-forwarding rules when using NAT-ed
+Libvirt hook for setting up firewalld port-forwarding rules when using NAT-ed
 networking.
 """
-__author__ = "Sascha Peilicke <saschpe@gmx.de>"
-__version__ = "0.1.1"
+
+__author__ = "Przemysław Szypowicz <pszypowicz@gmail.com>"
+__version__ = "0.2.0"
 
 
 import os
@@ -18,7 +19,7 @@ import sys
 CONFIG_PATH = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILENAME = os.path.join(CONFIG_PATH, "qemu.json")
 CONFIG_SCHEMA_FILENAME = os.path.join(CONFIG_PATH, "qemu.schema.json")
-IPTABLES_BINARY = subprocess.check_output(["which", "iptables"]).strip()
+FIREWALLD_BINARY = subprocess.check_output(["which", "firewall-cmd"]).strip()
 
 
 def host_ip():
@@ -63,7 +64,7 @@ def config(validate=True):
     return config._conf
 
 
-def iptables_forward(action, domain):
+def firewalld_forward(action, domain):
     """Set iptables port-forwarding rules based on domain configuration.
 
     Args:
@@ -75,20 +76,8 @@ def iptables_forward(action, domain):
     for protocol in domain["port_map"]:
         # Iterate over all public/private port pairs for the protocol
         for public_port, private_port in domain["port_map"].get(protocol):
-            args = [IPTABLES_BINARY,
-                    "-t", "nat", action, "PREROUTING",
-                    "-p", protocol,
-                    "-d", public_ip, "--dport", str(public_port),
-                    "-j", "DNAT", "--to", "{0}:{1}".format(domain["private_ip"], str(private_port))]
-            subprocess.call(args)
-
-            args = [IPTABLES_BINARY,
-                    "-t", "filter", action, "FORWARD",
-                    "-p", protocol,
-                    "--dport", str(private_port),
-                    "-j", "ACCEPT"]
-            if "interface" in domain:
-                args += ["-o", domain["interface"]]
+            args = [FIREWALLD,
+                "--{0}-forward-port=port={1}:proto=tcp:toport={2}:toaddr={3}".format(action,public_port,private_port,domain["private_ip"])]
             subprocess.call(args)
 
 
@@ -98,6 +87,6 @@ if __name__ == "__main__":
     if domain is None:
         sys.exit(0)
     if action in ["stopped", "reconnect"]:
-        iptables_forward("-D", domain)
+        firewalld_forward("remove", domain)
     if action in ["start", "reconnect"]:
-        iptables_forward("-I", domain)
+        firewalld_forward("add", domain)
