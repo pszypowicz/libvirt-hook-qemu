@@ -76,7 +76,7 @@ def firewalld_forward(action, domain):
     for protocol in domain["port_map"]:
         # Iterate over all public/private port pairs for the protocol
         for public_port, private_port in domain["port_map"].get(protocol):
-            args = [FIREWALLD,
+            args = [FIREWALLD_BINARY,
                 "--{0}-forward-port=port={1}:proto=tcp:toport={2}:toaddr={3}".format(action,public_port,private_port,domain["private_ip"])]
             subprocess.call(args)
 
