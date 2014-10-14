@@ -1,8 +1,8 @@
 Libvirt port-forwarding hook
 ============================
 
-Fork of hook made my Sascha Peilicke
-available uner that link: https://github.com/saschpe/libvirt-hook-qemu
+Fork of hook made my Sascha Peilicke,
+available under that link: https://github.com/saschpe/libvirt-hook-qemu
 
 Libvirt hook for setting up firewalld port-forwarding rules when using NAT-ed
 networking.
