@@ -1,7 +1,10 @@
 Libvirt port-forwarding hook
 ============================
 
-Libvirt hook for setting up iptables port-forwarding rules when using NAT-ed
+Fork of hook made my Sascha Peilicke
+available uner that link: https://github.com/saschpe/libvirt-hook-qemu
+
+Libvirt hook for setting up firewalld port-forwarding rules when using NAT-ed
 networking.
 
 
@@ -27,4 +30,4 @@ configuration files won't be touched. The files can be removed again with:
 Author
 ------
 
-Sascha Peilicke
+Przemysław Szypowicz
